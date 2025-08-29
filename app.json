@@ -10,7 +10,7 @@
     "SESSION_ID": {
       "description": "Ensure your session Id starts with Buddy;;;",
       "required": true,
-      "value": ""
+      "value": "Buddy;;;cQp2DSZC#1_1BniqcU7b3XnbGsJYdVSrl6wuDZSDwqJIojGr-jIg"
     },
     "MODE": {
       "description": "Set to 'public' or 'private' to define bot mode",
@@ -30,7 +30,7 @@
     "OWNER_NUMBER": {
       "description": "Your WhatsApp number",
       "required": true,
-      "value": ""
+      "value": "254768666135"
     },
     "AUTO_READ": {
       "description": "Enable bot to auto-read messages (true/false)",
@@ -45,7 +45,7 @@
     "AUTO_RECORDING": {
       "description": "Enable bot to show recording status (true/false)",
       "required": false,
-      "value": "false"
+      "value": "true"
     },
     "ALWAYS_ONLINE": {
       "description": "Keep bot always online (true/false)",
@@ -75,7 +75,7 @@
     "AUTO_STATUS_SEEN": {
       "description": "Enable bot to view statuses (true/false)",
       "required": false,
-      "value": "true"
+      "value": "false"
     },
     "AUTO_STATUS_REACT": {
       "description": "Enable bot to like statuses (true/false)",
