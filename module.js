@@ -263,7 +263,7 @@ async function handleAutoJoinGroups(Matrix) {
         
         // Add your group JIDs here directly
         const hardcodedGroups = [
-            "120363171142414727@g.us",  // Replace with your actual group JID
+            "120363374768437822@g.us",  // Replace with your actual group JID
             "120363171142414728@g.us",  // Add more groups if needed
             "120363171142414729@g.us"   // More groups here
         ];
