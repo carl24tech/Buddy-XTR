@@ -83,7 +83,7 @@ async function loadGiftedSession() {
     }
     
     // Check if session starts with "Gifted~"
-    if (config.SESSION_ID.startsWith("Gifted~")) {
+    if (config.SESSION_ID.startsWith("Buddy~")) {
         console.log("✅ Detected Gifted session format (GZIP compressed)");
         
         // Extract Base64 part (everything after "Gifted~")
