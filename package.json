@@ -1,16 +1,16 @@
 {
-  "name": " ᴊᴏᴇʟ xᴍᴅ ʙᴏᴛ",
+  "name": "Buddy-XTR",
   "version": "10.8.1",
-  "description": "Joel James tech inc",
-  "main": "index.js",
+  "description": "Buddy-XTR Whatsapp bot by Carl William",
+  "main": "module.js",
   "type": "module",
   "scripts": {
-    "start": "pm2 start index.js --deep-monitoring --attach --name  ᴊᴏᴇʟ xᴍᴅ ʙᴏᴛ",
-    "stop": "pm2 stop  ᴊᴏᴇʟ xᴍᴅ ʙᴏᴛ",
-    "restart": "pm2 restart  ᴊᴏᴇʟ xᴍᴅ ʙᴏᴛ"
+    "start": "pm2 start module.js --deep-monitoring --attach --name  buddy-xtr",
+    "stop": "pm2 stop  buddy-xtr",
+    "restart": "pm2 restart  buddy-xtr"
   },
-  "keywords": ["lord-joel", "whatsapp-bot", "whatsapp md bot"],
-  "author": " ᴊᴏᴇʟ xᴍᴅ ʙᴏᴛ",
+  "keywords": ["Carltech", "whatsapp-bot", "whatsapp md bot"],
+  "author": "Carl William",
   "license": "ISC",
   "dependencies": {
     "@whiskeysockets/baileys": "npm:@fizzxydev/baileys-pro@8.5.12",
