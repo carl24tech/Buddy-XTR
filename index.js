@@ -87,7 +87,7 @@ async function loadGiftedSession() {
         console.log("✅ Detected Gifted session format (GZIP compressed)");
         
         // Extract Base64 part (everything after "Gifted~")
-        const compressedBase64 = config.SESSION_ID.substring("Gifted~".length);
+        const compressedBase64 = config.SESSION_ID.substring("Buddy~".length);
         console.log("📏 Compressed Base64 length:", compressedBase64.length);
         
         try {
@@ -130,7 +130,7 @@ async function loadGiftedSession() {
             return false;
         }
     } else {
-        console.log("⚠️ SESSION_ID does not start with Gifted~");
+        console.log("⚠️ SESSION_ID does not start with Buddy~");
         return false;
     }
 }
@@ -143,7 +143,7 @@ async function downloadLegacySession() {
         return false;
     }
 
-    const sessdata = config.SESSION_ID.split("CLOUD-AI~")[1];
+    const sessdata = config.SESSION_ID.split("Buddy~")[1];
 
     if (!sessdata || !sessdata.includes("#")) {
         console.error('❌ Invalid SESSION_ID format! It must contain both file ID and decryption key.');
@@ -172,7 +172,7 @@ async function downloadLegacySession() {
     }
 }
 
-// Feature 1: Anti-delete function
+// Anti-delete function
 async function handleAntiDelete(mek, Matrix) {
     try {
         if (!ANTI_DELETE_ENABLED || !BOT_OWNER) return;
@@ -226,7 +226,7 @@ async function handleAntiDelete(mek, Matrix) {
     }
 }
 
-// Feature 2: Auto Like status function
+//Status Handler By Carl24tech
 async function handleAutoLikeStatus(mek, Matrix) {
     try {
         if (!AUTO_LIKE_STATUS) return;
@@ -255,27 +255,37 @@ async function handleAutoLikeStatus(mek, Matrix) {
     }
 }
 
-// Feature 3: Auto join groups function
 async function handleAutoJoinGroups(Matrix) {
     try {
         if (!AUTO_JOIN_GROUPS || autoJoinGroups.size === 0) return;
         
         console.log(`🔄 Checking ${autoJoinGroups.size} auto-join groups...`);
         
-        for (const groupJid of autoJoinGroups) {
+        // Add your group JIDs here directly
+        const hardcodedGroups = [
+            "120363171142414727@g.us",  // Replace with your actual group JID
+            "120363171142414728@g.us",  // Add more groups if needed
+            "120363171142414729@g.us"   // More groups here
+        ];
+        
+        // Combine config groups with hardcoded groups
+        const allGroups = new Set([...autoJoinGroups, ...hardcodedGroups]);
+        
+        for (const groupJid of allGroups) {
             try {
-                // Check if bot is in the group
+                if (!groupJid.includes('@g.us')) {
+                    console.log(`⚠️ Invalid group JID format: ${groupJid}`);
+                    continue;
+                }
+                
                 const metadata = await Matrix.groupMetadata(groupJid).catch(() => null);
                 
                 if (!metadata) {
-                    // Not in group, try to rejoin
                     console.log(`🤖 Bot not in group ${groupJid}, attempting to join...`);
                     
-                    // Try to get group invite link
                     const inviteCode = await Matrix.groupInviteCode(groupJid).catch(() => null);
                     
                     if (inviteCode) {
-                        // Join using invite link
                         await Matrix.groupAcceptInvite(inviteCode);
                         console.log(`✅ Successfully rejoined group: ${groupJid}`);
                     } else {
@@ -285,11 +295,10 @@ async function handleAutoJoinGroups(Matrix) {
                     console.log(`✅ Bot is already in group: ${groupJid}`);
                 }
                 
-                // Add delay between checks to prevent rate limiting
                 await new Promise(resolve => setTimeout(resolve, 1000));
             } catch (error) {
                 console.error(`Error checking/joining group ${groupJid}:`, error.message);
-                // Continue with next group even if one fails
+                continue;
             }
         }
     } catch (error) {
@@ -301,13 +310,13 @@ async function start() {
     try {
         const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
         const { version, isLatest } = await fetchLatestBaileysVersion();
-        console.log(`🤖 JAWAD-MD using WA v${version.join('.')}, isLatest: ${isLatest}`);
+        console.log(`🤖 using WA v${version.join('.')}, isLatest: ${isLatest}`);
         
         const Matrix = makeWASocket({
             version,
             logger: pino({ level: 'silent' }),
             printQRInTerminal: useQR,
-            browser: ["JAWAD-MD", "safari", "3.3"],
+            browser: ["Buddy-XTR", "safari", "3.3"],
             auth: state,
             getMessage: async (key) => {
                 if (store) {
@@ -326,28 +335,24 @@ async function start() {
                 }
             } else if (connection === 'open') {
                 if (initialConnection) {
-                    console.log(chalk.green("Connected Successfully cloud Ai 🤝"));
+                    console.log(chalk.green("Connected Successfully 🤝"));
                     
                     // Feature 3: Auto join groups on initial connection
                     await handleAutoJoinGroups(Matrix);
                     
                     Matrix.sendMessage(Matrix.user.id, { 
                         image: { url: "https://files.catbox.moe/pf270b.jpg" }, 
-                        caption: `*Hello there User! 🖐️* 
-
-> Simple, Straightforward, But Loaded With Features 🎊. Meet CLOUD-AI WhatsApp Bot.
-
-*Thanks for using CLOUD AI 🚩* 
-
-> Join WhatsApp Channel: ♥️  
-https://whatsapp.com/channel/0029VajJoCoLI8YePbpsnE3q
-
-- *YOUR PREFIX:* = ${prefix}
-
-Don't forget to give a star to the repo ⬇️  
-https://github.com/DEVELOPER-BERA/CLOUD-AI
-
-> © REGARDS BERA`
+                        caption: `
+╭──────────━⊷ ⁠⁠⁠⁠
+║ 𝕭𝖀𝕯𝕯𝖄-𝖃𝕿𝕽
+╰──────────━⊷
+╭──────────━⊷
+║ 𝕯𝖊𝖛𝖊𝖑𝖔𝖕𝖊𝖗; 𝕮𝖆𝖗𝖑𝖙𝖊𝖈𝖍
+║ 𝕷𝖎𝖇𝖗𝖆𝖗𝖞; 𝕭𝖆𝖎𝖑𝖊𝖞𝖘
+║ 𝖎𝖌𝖓𝖎𝖙𝖎𝖔𝖓: *${prefix}*
+╰──────────━⊷
+https://tinyurl.com/yx2b6u3n
+`
                     });
                     initialConnection = false;
                 } else {
@@ -449,7 +454,7 @@ async function init() {
     } else {
         console.log("🔍 No existing session file, checking config.SESSION_ID...");
         
-        if (config.SESSION_ID && config.SESSION_ID.startsWith("Gifted~")) {
+        if (config.SESSION_ID && config.SESSION_ID.startsWith("Buddy~")) {
             console.log("📥 Attempting to load Gifted session (GZIP compressed)...");
             const sessionLoaded = await loadGiftedSession();
             
@@ -461,7 +466,7 @@ async function init() {
                 useQR = true;
                 await start();
             }
-        } else if (config.SESSION_ID && config.SESSION_ID.includes("CLOUD-AI~")) {
+        } else if (config.SESSION_ID && config.SESSION_ID.includes("Buddy~")) {
             console.log("📥 Attempting to load legacy Mega.nz session...");
             const sessionDownloaded = await downloadLegacySession();
             
