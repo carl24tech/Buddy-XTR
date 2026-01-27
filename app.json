@@ -1,14 +1,14 @@
 {
-  "name": "CLOUD Ai",
-  "description": "🚀 CLOUD AI WhatsApp MultiDevice Bot – Your ultimate AI-powered assistant, built in Node.js to revolutionize WhatsApp automation! From smart replies to advanced moderation, experience seamless interaction like never before. 💡✨",
-  "logo": "https://files.catbox.moe/7jt69h.jpg",
-  "keywords": ["BERA-TECH", "whatsapp-bot", "whatsapp-md-bot"],
-  "repository": "https://github.com/DEVELOPER-BERA/CLOUD-AI",
+  "name": "Buddy-XTR",
+  "description": "A WhatsApp MultiDevice Bot – Your ultimate AI-powered assistant, built in Node.js to revolutionize WhatsApp automation! From smart replies to advanced moderation, experience seamless interaction like never before. 💡✨",
+  "logo": "https://files.catbox.moe/7jt6op.jpg",
+  "keywords": ["Carl William", "whatsapp-bot", "whatsapp-md-bot"],
+  "repository": "https://github.com/carl24tech/Buddy-XTR",
   "stack": "container",
   "env": { 
   
     "SESSION_ID": {
-      "description": "Ensure your session Id starts with the word CLOUD-AI~$",
+      "description": "Ensure your session Id starts with the word Buddy~$",
       "required": true,
       "value": ""
     },
@@ -20,12 +20,12 @@
     "OWNER_NAME": {
       "description": "Your name as the bot owner",
       "required": true,
-      "value": "BRUCE BERA"
+      "value": "Carl William"
     },
     "OWNER_NUMBER": {
       "description": "Your WhatsApp number",
       "required": true,
-      "value": "254743982206"
+      "value": "25474xxx"
     },
     "AUTO_READ": {
       "description": "Enable bot to auto-read messages (true/false)",
