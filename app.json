@@ -1,14 +1,14 @@
-
 {
-  "name": "CARL TECH",
-  "description": "Buddy-XTR by carl william.",
-  "logo": "https://files.catbox.moe/waszph.jpg",
-  "keywords": ["CARL-TECH", "whatsapp-bot", "whatsapp-md-bot"],
-  "repository": "https://github.com/carl24tech/Buddy-XTR",
+  "name": "CLOUD Ai",
+  "description": "🚀 CLOUD AI WhatsApp MultiDevice Bot – Your ultimate AI-powered assistant, built in Node.js to revolutionize WhatsApp automation! From smart replies to advanced moderation, experience seamless interaction like never before. 💡✨",
+  "logo": "https://files.catbox.moe/7jt69h.jpg",
+  "keywords": ["BERA-TECH", "whatsapp-bot", "whatsapp-md-bot"],
+  "repository": "https://github.com/DEVELOPER-BERA/CLOUD-AI",
   "stack": "container",
   "env": { 
+  
     "SESSION_ID": {
-      "description": "Ensure your session Id starts with Buddy;;;",
+      "description": "Ensure your session Id starts with the word CLOUD-AI~$",
       "required": true,
       "value": ""
     },
@@ -17,20 +17,15 @@
       "required": true,
       "value": "public"
     },
-    "PREFIX": {
-      "description": "Your Bot Prefix (default: .)",
-      "required": false,
-      "value": "."
-    },
     "OWNER_NAME": {
       "description": "Your name as the bot owner",
-      "required": false,
-      "value": "𝖂𝖎𝖑𝖑𝖎𝖆𝖒"
+      "required": true,
+      "value": "BRUCE BERA"
     },
     "OWNER_NUMBER": {
       "description": "Your WhatsApp number",
       "required": true,
-      "value": ""
+      "value": "254743982206"
     },
     "AUTO_READ": {
       "description": "Enable bot to auto-read messages (true/false)",
@@ -57,19 +52,9 @@
       "required": false,
       "value": "false"
     },
-    "AUTO_BIO": {
-      "description": "Enable bot to automatically change your bio (true/false)",
-      "required": false,
-      "value": "true"
-    },
-    "ANTI_WORD": {
-      "description": "If enabled,the bot will auto-block abusive words(true/false)",
-      "required": false,
-      "value": "false"
-    },
     "ANTI_DELETE": {
-      "description": "If enabled,the bot will auto-recover deleted messages(true/false)",
-      "required": false,
+      "description": "Enable anti-delete feature (true/false)",
+      "required": true,
       "value": "true"
     },
     "AUTO_STATUS_SEEN": {
@@ -77,10 +62,15 @@
       "required": false,
       "value": "true"
     },
-    "AUTO_STATUS_REACT": {
-      "description": "Enable bot to like statuses (true/false)",
+    "AUTO_STATUS_REPLY": {
+      "description": "Enable bot to reply after viewing a status (true/false)",
       "required": false,
-      "value": "true"
+      "value": "false"
+    },
+    "STATUS_READ_MSG": {
+      "description": "Set the message bot sends after viewing a status",
+      "required": false,
+      "value": "*Status Seen*"
     },
     "AUTO_BLOCK": {
       "description": "Enable bot to auto-block specific numbers (true/false)",
