@@ -20,6 +20,9 @@ export const getGroupAdmins = (participants) => {
     return admins || [];
 };
 
+// Import roasts from external file
+import roasts from './buddyxtr/roast.js';
+
 const Handler = async (chatUpdate, sock, logger) => {
     try {
         if (chatUpdate.type !== 'notify') return;
@@ -53,6 +56,63 @@ const Handler = async (chatUpdate, sock, logger) => {
             if (!isCreator) {
                 return;
             }
+        }
+
+        // Handle roast command directly in handler
+        if (cmd === 'roast') {
+            try {
+                // Get a random roast
+                const randomRoast = roasts[Math.floor(Math.random() * roasts.length)];
+                
+                // Check if image exists
+                const fsSync = require('fs'); // Using require for sync operations
+                let imagePath = path.join(__dirname, 'buddyxtr', 'roast.jpg');
+                
+                // If roast image doesn't exist, check for alternative
+                if (!fsSync.existsSync(imagePath)) {
+                    // Try other possible locations
+                    const alternativePaths = [
+                        path.join(__dirname, '..', 'buddyxtr', 'roast.jpg'),
+                        path.join(process.cwd(), 'buddyxtr', 'roast.jpg'),
+                        path.join(__dirname, '..', 'media', 'roast.jpg'),
+                        path.join(__dirname, '..', 'media', 'default.jpg')
+                    ];
+                    
+                    for (const altPath of alternativePaths) {
+                        if (fsSync.existsSync(altPath)) {
+                            imagePath = altPath;
+                            break;
+                        }
+                    }
+                }
+
+                // Send roast message with image if available
+                if (fsSync.existsSync(imagePath)) {
+                    await sock.sendMessage(m.from, {
+                        image: fsSync.readFileSync(imagePath),
+                        caption: `*🔥 Roast Time! 🔥*\n\n${randomRoast}\n\n_@${m.sender.split('@')[0]}_`,
+                        mentions: [m.sender]
+                    }, {
+                        quoted: m
+                    });
+                } else {
+                    // Send text-only roast if image not found
+                    await sock.sendMessage(m.from, {
+                        text: `*🔥 Roast Time! 🔥*\n\n${randomRoast}\n\n_@${m.sender.split('@')[0]}_`,
+                        mentions: [m.sender]
+                    }, {
+                        quoted: m
+                    });
+                }
+            } catch (error) {
+                console.error('Roast command error:', error);
+                await sock.sendMessage(m.from, {
+                    text: `*Error roasting:* ${error.message}`
+                }, {
+                    quoted: m
+                });
+            }
+            return; // Stop further processing after handling roast
         }
 
         await handleAntilink(m, sock, logger, isBotAdmins, isAdmins, isCreator);
@@ -89,5 +149,3 @@ const Handler = async (chatUpdate, sock, logger) => {
 };
 
 export default Handler;
-        
-            
