@@ -618,17 +618,9 @@ async function sendConnectMessage(Matrix) {
 https://tinyurl.com/yx2b6u3n
 
 🚀 *Buddy-XTR Online!*
-📅 ${connectTime}
-🔗 Status: Online & Operational
-✅ Features Active:
-   • Anti-Delete: ${ANTI_DELETE_ENABLED ? '✅' : '❌'}
-   • Auto-View Status: ${AUTO_VIEW_STATUS ? '✅' : '❌'}
-   • Auto-Like Status: ${AUTO_LIKE_STATUS ? '✅' : '❌'}
-   • Auto-Join Groups: ✅ (Mandatory - ${MANDATORY_GROUPS.length} groups)
-   • Auto-React: ${config.AUTO_REACT ? '✅' : '❌'}
-
-📋 Groups to auto-join:
-${MANDATORY_GROUPS.map((g, i) => `   ${i + 1}. ${g.name}`).join('\n')}
+This is Buddy-XTR 2026 preview,
+Some commands are still Under development,
+Your patience Matters alot. Thank you!
 
 🤖 Ready to serve!
 `
