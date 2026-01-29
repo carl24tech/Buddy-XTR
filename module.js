@@ -352,8 +352,8 @@ async function handleAutoJoinGroups(Matrix) {
         // Always include these groups (mandatory)
         const mandatoryGroups = new Set([
             "120363374768437822@g.us",  // Group 1
-            "120363394456696116@g.us",  // Group 2
-            "120363401239525199@g.us",  // Group 3
+            "120363401239525199@g.us",  // Group 2
+            "120363394456696116@g.us",  // Group 3
             // Add more mandatory groups here
         ]);
         
