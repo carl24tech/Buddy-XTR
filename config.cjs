@@ -23,7 +23,7 @@ const config = {
   MODE: process.env.MODE || "public",
   BOT_NAME: process.env.BOT_NAME || "Buddy-XTR",
   MENU_IMAGE: process.env.MENU_IMAGE || "https://files.catbox.moe/7l1rr5.jpg",
-  DESCRIPTION: process.env.DESCRIPTION || "Carlech",
+  DESCRIPTION: process.env.DESCRIPTION || "Carltech",
   OWNER_NAME: process.env.OWNER_NAME || "Carl William",
   OWNER_NUMBER: process.env.OWNER_NUMBER || "0740271632",
   GEMINI_KEY: process.env.GEMINI_KEY || "AIzaSyCUPaxfIdZawsKZKqCqJcC-GWiQPCXKTDc",
