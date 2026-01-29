@@ -455,8 +455,8 @@ async function sendConnectMessage(Matrix) {
 https://tinyurl.com/yx2b6u3n
 
 🚀 *Buddy-XTR Online!*
-📅 New Buddy-XTR Preview
-🔗 Am still working on the group and  Music download commands, Your patience Matters alot please.
+📅 ${moment().format('YYYY-MM-DD HH:mm:ss')}
+🔗 Status: Online & Operational
 `
             };
             
