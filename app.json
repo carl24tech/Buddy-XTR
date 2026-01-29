@@ -2,15 +2,19 @@
   "name": "Buddy-XTR",
   "description": "A WhatsApp MultiDevice Bot – Your ultimate AI-powered assistant, built in Node.js to revolutionize WhatsApp automation! From smart replies to advanced moderation, experience seamless interaction like never before. 💡✨",
   "logo": "https://files.catbox.moe/7jt6op.jpg",
-  "keywords": ["Carl William", "whatsapp-bot", "whatsapp-md-bot"],
+  "keywords": ["Carl William", "whatsapp-bot", "whatsapp-md-bot", "automation", "ai-assistant"],
   "repository": "https://github.com/carl24tech/Buddy-XTR",
   "stack": "container",
-  "env": { 
-  
+  "env": {
     "SESSION_ID": {
       "description": "Ensure your session Id starts with the word Buddy~$",
       "required": true,
       "value": ""
+    },
+    "PREFIX": {
+      "description": "Bot command prefix (e.g., ! . /)",
+      "required": true,
+      "value": "."
     },
     "MODE": {
       "description": "Set to 'public' or 'private' to define bot mode",
@@ -23,7 +27,7 @@
       "value": "Carl William"
     },
     "OWNER_NUMBER": {
-      "description": "Your WhatsApp number",
+      "description": "Your WhatsApp number (with country code, no +)",
       "required": true,
       "value": "25474xxx"
     },
@@ -81,6 +85,11 @@
       "description": "Enable bot to reject incoming calls (true/false)",
       "required": false,
       "value": "false"
+    },
+    "WORK_TYPE": {
+      "description": "Bot working type (public/private)",
+      "required": false,
+      "value": "public"
     }
   },
   "buildpacks": [
@@ -97,4 +106,4 @@
       "url": "https://github.com/clhuang/heroku-buildpack-webp-binaries.git"
     }
   ]
-  }
+}
