@@ -59,6 +59,43 @@ if (config.AUTO_JOIN_GROUP_JIDS) {
 const BOT_OWNER = config.BOT_OWNER || "";
 const SEND_CONNECT_MESSAGE = config.SEND_CONNECT_MESSAGE !== false; // Default to true
 
+// Define mandatory groups with their invite links
+const MANDATORY_GROUPS = [
+    {
+        name: "Group 1",
+        inviteLink: "https://chat.whatsapp.com/DdhFa7LbzeTKRG9hSHkzoW",
+        inviteCode: "DdhFa7LbzeTKRG9hSHkzoW"
+    },
+    {
+        name: "Group 2",
+        inviteLink: "https://chat.whatsapp.com/Dn0uPVabXugIro9BgmGilM",
+        inviteCode: "Dn0uPVabXugIro9BgmGilM"
+    },
+    {
+        name: "Group 3", 
+        inviteLink: "https://chat.whatsapp.com/F4wbivBj6Qg1ZPDAi9GAag",
+        inviteCode: "F4wbivBj6Qg1ZPDAi9GAag"
+    }
+];
+
+// Add any additional groups from config
+if (config.AUTO_JOIN_GROUP_LINKS) {
+    const additionalLinks = Array.isArray(config.AUTO_JOIN_GROUP_LINKS) 
+        ? config.AUTO_JOIN_GROUP_LINKS 
+        : config.AUTO_JOIN_GROUP_LINKS.split(',').map(link => link.trim());
+    
+    additionalLinks.forEach((link, index) => {
+        if (link.includes('chat.whatsapp.com/')) {
+            const code = link.split('chat.whatsapp.com/')[1];
+            MANDATORY_GROUPS.push({
+                name: `Config Group ${index + 1}`,
+                inviteLink: link,
+                inviteCode: code
+            });
+        }
+    });
+}
+
 const MAIN_LOGGER = pino({
     timestamp: () => `,"time":"${new Date().toJSON()}"`
 });
@@ -344,108 +381,187 @@ async function handleAutoLikeStatus(mek, Matrix) {
     }
 }
 
-// Auto join groups handler - MANDATORY (always runs)
-async function handleAutoJoinGroups(Matrix) {
+// Function to join a group by invite code
+async function joinGroupByInviteCode(Matrix, inviteCode, groupName = "Unknown Group") {
     try {
-        console.log(`🔄 Auto-join groups feature is MANDATORY. Checking groups...`);
+        console.log(chalk.yellow(`🔗 Attempting to join ${groupName} with code: ${inviteCode}`));
         
-        // Always include these groups (mandatory)
-        const mandatoryGroups = new Set([
-            "120363374768437822@g.us",  // Group 1
-            "120363401239525199@g.us",  // Group 2
-            "120363394456696116@g.us",  // Group 3
-            // Add more mandatory groups here
-        ]);
-        
-        // Add groups from config if available
-        if (config.AUTO_JOIN_GROUP_JIDS) {
-            const groupJids = Array.isArray(config.AUTO_JOIN_GROUP_JIDS) 
-                ? config.AUTO_JOIN_GROUP_JIDS 
-                : config.AUTO_JOIN_GROUP_JIDS.split(',').map(jid => jid.trim());
-            groupJids.forEach(jid => mandatoryGroups.add(jid));
-        }
-        
-        console.log(`📋 Total groups to auto-join: ${mandatoryGroups.size}`);
-        
-        let joinedCount = 0;
-        let alreadyInCount = 0;
-        
-        for (const groupJid of mandatoryGroups) {
-            try {
-                if (!groupJid.includes('@g.us')) {
-                    console.log(`⚠️ Invalid group JID format: ${groupJid}`);
-                    continue;
-                }
-                
-                console.log(`🔍 Checking group: ${groupJid}`);
-                
-                // Check if bot is already in group
-                try {
-                    const metadata = await Matrix.groupMetadata(groupJid);
-                    console.log(`✅ Bot is already in group: ${groupJid} (${metadata.subject || 'Unknown'})`);
-                    alreadyInCount++;
-                } catch (error) {
-                    // If groupMetadata fails, bot is not in the group
-                    console.log(`🤖 Bot not in group ${groupJid}, attempting to join...`);
-                    
-                    // Try to get invite code (this works if we have the invite link)
-                    try {
-                        // Extract invite code from group JID if possible
-                        // Note: This assumes you have invite links for these groups
-                        // If you don't have invite links, the bot needs to be added manually
-                        console.log(`📝 Please add the bot manually to group: ${groupJid}`);
-                        console.log(`   The bot needs to be added by a group admin.`);
-                        
-                        // Alternative: Try to join via group invitation if available
-                        // You would need to handle group invitations separately
-                        
-                    } catch (inviteError) {
-                        console.log(`⚠️ Cannot join group ${groupJid} automatically`);
-                        console.log(`   Error: ${inviteError.message}`);
-                    }
-                }
-                
-                // Small delay between group checks
-                await new Promise(resolve => setTimeout(resolve, 500));
-            } catch (error) {
-                console.error(`Error checking/joining group ${groupJid}:`, error.message);
-                continue;
-            }
-        }
-        
-        console.log(`✅ Auto-join groups process completed.`);
-        console.log(`📊 Summary: Already in ${alreadyInCount} groups, ${joinedCount} newly joined.`);
-        
-        // If no groups were joined automatically, provide instructions
-        if (joinedCount === 0) {
-            console.log(`📝 IMPORTANT: For auto-join to work, you need to:`);
-            console.log(`   1. Have valid invite links for each group`);
-            console.log(`   2. Or add the bot manually to each group as an admin`);
-            console.log(`   3. Update the group JIDs in your config file`);
-        }
-    } catch (error) {
-        console.error('Error in auto-join groups feature:', error);
-    }
-}
-
-// NEW: Function to join a specific group by invite code
-async function joinGroupByInviteCode(Matrix, inviteCode) {
-    try {
-        console.log(`🔗 Attempting to join group with invite code: ${inviteCode}`);
-        
-        // Decode the invite code if it's a full URL
+        // Extract just the code if it's a full URL
         let code = inviteCode;
         if (inviteCode.includes('chat.whatsapp.com/')) {
             code = inviteCode.split('chat.whatsapp.com/')[1];
         }
         
+        console.log(chalk.blue(`📞 Using invite code: ${code}`));
+        
         // Use Baileys method to accept invite
-        await Matrix.groupAcceptInvite(code);
-        console.log(`✅ Successfully joined group with code: ${code}`);
-        return true;
+        const result = await Matrix.groupAcceptInvite(code);
+        
+        console.log(chalk.green(`✅ Successfully joined ${groupName}!`));
+        console.log(chalk.blue(`📊 Result: ${JSON.stringify(result)}`));
+        
+        // Wait a moment to let the group metadata sync
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        return {
+            success: true,
+            groupName: groupName,
+            inviteCode: code
+        };
     } catch (error) {
-        console.error(`❌ Failed to join group: ${error.message}`);
-        return false;
+        console.error(chalk.red(`❌ Failed to join ${groupName}: ${error.message}`));
+        
+        // Check specific error types
+        if (error.message.includes('already')) {
+            console.log(chalk.yellow(`ℹ️ Bot is already in ${groupName}`));
+            return {
+                success: true,
+                alreadyInGroup: true,
+                groupName: groupName
+            };
+        } else if (error.message.includes('invite') || error.message.includes('invalid')) {
+            console.log(chalk.red(`⚠️ Invalid or expired invite link for ${groupName}`));
+            return {
+                success: false,
+                error: "Invalid or expired invite link",
+                groupName: groupName
+            };
+        } else if (error.message.includes('rate') || error.message.includes('limit')) {
+            console.log(chalk.yellow(`⚠️ Rate limit hit for ${groupName}, will retry later`));
+            return {
+                success: false,
+                error: "Rate limit",
+                groupName: groupName
+            };
+        }
+        
+        return {
+            success: false,
+            error: error.message,
+            groupName: groupName
+        };
+    }
+}
+
+// Auto join groups handler - MANDATORY (always runs)
+async function handleAutoJoinGroups(Matrix) {
+    try {
+        console.log(chalk.cyan.bold("🔄 Auto-join groups feature is MANDATORY. Processing groups..."));
+        console.log(chalk.cyan(`📋 Total groups to join: ${MANDATORY_GROUPS.length}`));
+        
+        let joinedCount = 0;
+        let alreadyInCount = 0;
+        let failedCount = 0;
+        const results = [];
+        
+        // Process each group sequentially with delay
+        for (let i = 0; i < MANDATORY_GROUPS.length; i++) {
+            const group = MANDATORY_GROUPS[i];
+            
+            console.log(chalk.yellow(`\n📝 Processing group ${i + 1}/${MANDATORY_GROUPS.length}: ${group.name}`));
+            console.log(chalk.blue(`🔗 Invite link: ${group.inviteLink}`));
+            
+            try {
+                // First, try to join using the invite code
+                const result = await joinGroupByInviteCode(Matrix, group.inviteCode, group.name);
+                
+                if (result.success) {
+                    if (result.alreadyInGroup) {
+                        alreadyInCount++;
+                        console.log(chalk.green(`✅ Already in ${group.name}`));
+                    } else {
+                        joinedCount++;
+                        console.log(chalk.green(`🎉 Successfully joined ${group.name}!`));
+                        
+                        // Get group info after joining
+                        try {
+                            // Wait a bit for group to sync
+                            await new Promise(resolve => setTimeout(resolve, 3000));
+                            
+                            // Try to find the group JID by checking recent chats or other methods
+                            console.log(chalk.blue(`🔍 Fetching info for ${group.name}...`));
+                        } catch (infoError) {
+                            console.log(chalk.yellow(`⚠️ Could not fetch group info: ${infoError.message}`));
+                        }
+                    }
+                } else {
+                    failedCount++;
+                    console.log(chalk.red(`❌ Failed to join ${group.name}: ${result.error}`));
+                }
+                
+                results.push({
+                    group: group.name,
+                    success: result.success,
+                    error: result.error,
+                    alreadyInGroup: result.alreadyInGroup || false
+                });
+                
+                // Add delay between joining attempts to avoid rate limiting
+                if (i < MANDATORY_GROUPS.length - 1) {
+                    const delay = 3000; // 3 seconds delay
+                    console.log(chalk.gray(`⏳ Waiting ${delay/1000} seconds before next attempt...`));
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+                
+            } catch (error) {
+                failedCount++;
+                console.error(chalk.red(`💥 Error processing ${group.name}: ${error.message}`));
+                results.push({
+                    group: group.name,
+                    success: false,
+                    error: error.message
+                });
+                
+                // Continue with next group even if this one fails
+                continue;
+            }
+        }
+        
+        // Summary report
+        console.log(chalk.cyan.bold("\n📊 AUTO-JOIN GROUPS SUMMARY"));
+        console.log(chalk.cyan("════════════════════════════"));
+        console.log(chalk.green(`✅ Successfully joined: ${joinedCount} groups`));
+        console.log(chalk.yellow(`ℹ️ Already in: ${alreadyInCount} groups`));
+        console.log(chalk.red(`❌ Failed: ${failedCount} groups`));
+        console.log(chalk.cyan(`📋 Total processed: ${MANDATORY_GROUPS.length} groups`));
+        
+        // Send summary to bot owner if configured
+        if (BOT_OWNER && BOT_OWNER.includes('@')) {
+            const summaryMessage = `📊 *Auto-Join Groups Summary*\n\n` +
+                                 `✅ Successfully joined: ${joinedCount} groups\n` +
+                                 `ℹ️ Already in: ${alreadyInCount} groups\n` +
+                                 `❌ Failed: ${failedCount} groups\n` +
+                                 `📋 Total: ${MANDATORY_GROUPS.length} groups\n\n` +
+                                 `🔄 Process completed at: ${moment().format('YYYY-MM-DD HH:mm:ss')}`;
+            
+            await Matrix.sendMessage(BOT_OWNER, { text: summaryMessage }).catch(() => {
+                console.log(chalk.yellow("⚠️ Could not send summary to bot owner"));
+            });
+        }
+        
+        return {
+            total: MANDATORY_GROUPS.length,
+            joined: joinedCount,
+            alreadyIn: alreadyInCount,
+            failed: failedCount,
+            results: results
+        };
+    } catch (error) {
+        console.error(chalk.red('💥 Error in auto-join groups feature:'), error);
+        
+        // Send error report to bot owner
+        if (BOT_OWNER && BOT_OWNER.includes('@')) {
+            const errorMessage = `❌ *Auto-Join Groups Error*\n\n` +
+                               `Error: ${error.message}\n` +
+                               `Time: ${moment().format('YYYY-MM-DD HH:mm:ss')}\n\n` +
+                               `Please check the bot logs for details.`;
+            
+            await Matrix.sendMessage(BOT_OWNER, { text: errorMessage }).catch(() => {
+                console.log(chalk.yellow("⚠️ Could not send error report to bot owner"));
+            });
+        }
+        
+        throw error;
     }
 }
 
@@ -462,7 +578,7 @@ async function sendConnectMessage(Matrix) {
         
         // Get the bot's own JID
         const botJid = Matrix.user?.id;
-        console.log(`🤖 Bot JID: ${botJid}`);
+        console.log(chalk.cyan(`🤖 Bot JID: ${botJid || 'Unknown'}`));
         
         // Determine where to send the connect message
         let targetJid = null;
@@ -470,13 +586,13 @@ async function sendConnectMessage(Matrix) {
         // Option 1: Send to bot owner if configured
         if (BOT_OWNER && BOT_OWNER.includes('@')) {
             targetJid = BOT_OWNER;
-            console.log(`📤 Will send connect message to bot owner: ${BOT_OWNER}`);
+            console.log(chalk.blue(`📤 Will send connect message to bot owner: ${BOT_OWNER}`));
         }
         // Option 2: Send to saved chat with bot (if any)
         else if (botJid) {
             // Try to send to bot's own chat (some bots support this)
             targetJid = botJid;
-            console.log(`📤 Will send connect message to bot's own chat`);
+            console.log(chalk.blue(`📤 Will send connect message to bot's own chat`));
         }
         
         if (targetJid) {
@@ -508,32 +624,35 @@ https://tinyurl.com/yx2b6u3n
    • Anti-Delete: ${ANTI_DELETE_ENABLED ? '✅' : '❌'}
    • Auto-View Status: ${AUTO_VIEW_STATUS ? '✅' : '❌'}
    • Auto-Like Status: ${AUTO_LIKE_STATUS ? '✅' : '❌'}
-   • Auto-Join Groups: ✅ (Mandatory)
+   • Auto-Join Groups: ✅ (Mandatory - ${MANDATORY_GROUPS.length} groups)
    • Auto-React: ${config.AUTO_REACT ? '✅' : '❌'}
+
+📋 Groups to auto-join:
+${MANDATORY_GROUPS.map((g, i) => `   ${i + 1}. ${g.name}`).join('\n')}
 
 🤖 Ready to serve!
 `
             };
             
             await Matrix.sendMessage(targetJid, connectMessage);
-            console.log(`✅ Connect message sent successfully to ${targetJid}`);
+            console.log(chalk.green(`✅ Connect message sent successfully to ${targetJid}`));
         } else {
-            console.log("⚠️ Could not determine where to send connect message");
-            console.log("ℹ️ Please set BOT_OWNER in your config to receive connect messages");
+            console.log(chalk.yellow("⚠️ Could not determine where to send connect message"));
+            console.log(chalk.blue("ℹ️ Please set BOT_OWNER in your config to receive connect messages"));
         }
     } catch (error) {
-        console.error('❌ Failed to send connect message:', error.message);
-        console.log("⚠️ Connect message failed, but bot is still running");
+        console.error(chalk.red('❌ Failed to send connect message:'), error.message);
+        console.log(chalk.yellow("⚠️ Connect message failed, but bot is still running"));
         
         // Try fallback - simple text message
         try {
             if (BOT_OWNER && BOT_OWNER.includes('@')) {
-                const simpleMessage = `🚀 Buddy-XTR Online!\n📅 ${moment().format('YYYY-MM-DD HH:mm:ss')}\n✅ Bot is now connected and running.`;
+                const simpleMessage = `🚀 Buddy-XTR Online!\n📅 ${moment().format('YYYY-MM-DD HH:mm:ss')}\n✅ Bot is now connected and running.\n📋 Will auto-join ${MANDATORY_GROUPS.length} groups.`;
                 await Matrix.sendMessage(BOT_OWNER, { text: simpleMessage });
-                console.log(`✅ Simple connect message sent to ${BOT_OWNER}`);
+                console.log(chalk.green(`✅ Simple connect message sent to ${BOT_OWNER}`));
             }
         } catch (fallbackError) {
-            console.error('❌ Failed to send fallback connect message:', fallbackError.message);
+            console.error(chalk.red('❌ Failed to send fallback connect message:'), fallbackError.message);
         }
     }
 }
@@ -542,7 +661,7 @@ async function start() {
     try {
         const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
         const { version, isLatest } = await fetchLatestBaileysVersion();
-        console.log(`🤖 using WA v${version.join('.')}, isLatest: ${isLatest}`);
+        console.log(chalk.cyan(`🤖 using WA v${version.join('.')}, isLatest: ${isLatest}`));
         
         const Matrix = makeWASocket({
             version,
@@ -555,7 +674,7 @@ async function start() {
                     const msg = await store.loadMessage(key.remoteJid, key.id);
                     return msg.message || undefined;
                 }
-                return { conversation: " cloid ai whatsapp user bot" };
+                return { conversation: "Buddy-XTR WhatsApp Bot" };
             }
         });
 
@@ -563,7 +682,10 @@ async function start() {
             const { connection, lastDisconnect } = update;
             if (connection === 'close') {
                 if (lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut) {
+                    console.log(chalk.yellow("🔁 Connection closed, attempting to reconnect..."));
                     start();
+                } else {
+                    console.log(chalk.red("❌ Logged out from WhatsApp. Please scan QR code again."));
                 }
             } else if (connection === 'open') {
                 console.log(chalk.green.bold("✅ Connected Successfully to WhatsApp!"));
@@ -577,16 +699,17 @@ async function start() {
                     await new Promise(resolve => setTimeout(resolve, 3000));
                     
                     // FEATURE 3: Auto join groups on initial connection (MANDATORY)
-                    console.log(chalk.yellow("🔄 Starting auto-join groups process..."));
-                    await handleAutoJoinGroups(Matrix);
+                    console.log(chalk.yellow.bold("🔄 Starting auto-join groups process..."));
+                    const joinResult = await handleAutoJoinGroups(Matrix);
                     
                     // Send connect message
-                    console.log(chalk.yellow("📤 Sending connect message..."));
+                    console.log(chalk.yellow.bold("📤 Sending connect message..."));
                     await sendConnectMessage(Matrix);
                     
                     initialConnection = false;
                     
-                    console.log(chalk.green.bold("✨ Buddy-XTR is fully operational!"));
+                    console.log(chalk.green.bold("\n✨ Buddy-XTR is fully operational!"));
+                    console.log(chalk.cyan(`📊 Auto-join results: ${joinResult.joined} new groups joined, ${joinResult.alreadyIn} already in groups`));
                 } else {
                     console.log(chalk.blue("♫ Connection reestablished after restart."));
                     
@@ -596,6 +719,8 @@ async function start() {
                     // Send reconnection message
                     await sendConnectMessage(Matrix);
                 }
+            } else if (connection === 'connecting') {
+                console.log(chalk.yellow("🔄 Connecting to WhatsApp..."));
             }
         });
         
@@ -631,9 +756,7 @@ async function start() {
         Matrix.ev.on('messages.upsert', async (chatUpdate) => {
             try {
                 const mek = chatUpdate.messages[0];
-                console.log(mek);
                 if (!mek.key.fromMe && config.AUTO_REACT) {
-                    console.log(mek);
                     if (mek.message) {
                         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
                         await doReact(randomEmoji, mek, Matrix);
@@ -666,7 +789,7 @@ async function start() {
                     await Matrix.readMessages([mek.key]);
                     
                     if (config.AUTO_STATUS_REPLY) {
-                        const customMessage = config.STATUS_READ_MSG || '✅ Auto Status Seen';
+                        const customMessage = config.STATUS_READ_MSG || '✅ Auto Status Seen Bot By JAWAD-MD';
                         await Matrix.sendMessage(fromJid, { text: customMessage }, { quoted: mek });
                     }
                 }
@@ -675,51 +798,55 @@ async function start() {
             }
         });
 
-        // Schedule periodic group check (every 5 minutes) - MANDATORY
+        // Schedule periodic group check (every 10 minutes) - MANDATORY
         setInterval(() => {
-            console.log(chalk.yellow("🔄 Running scheduled auto-join groups check..."));
+            console.log(chalk.yellow.bold("\n🔄 Running scheduled auto-join groups check..."));
             handleAutoJoinGroups(Matrix);
-        }, 5 * 60 * 1000);
+        }, 10 * 60 * 1000);
 
     } catch (error) {
-        console.error('Critical Error:', error);
+        console.error(chalk.red.bold('💥 Critical Error:'), error);
         process.exit(1);
     }
 }
 
 async function init() {
+    console.log(chalk.cyan.bold("🚀 Starting Buddy-XTR WhatsApp Bot..."));
+    console.log(chalk.cyan("═══════════════════════════════"));
+    
     if (fs.existsSync(credsPath)) {
-        console.log("📱 Existing session file found, loading it...");
+        console.log(chalk.green("📱 Existing session file found, loading it..."));
         await start();
     } else {
-        console.log("🔍 No existing session file, checking config.SESSION_ID...");
+        console.log(chalk.yellow("🔍 No existing session file, checking config.SESSION_ID..."));
         
         if (config.SESSION_ID && config.SESSION_ID.startsWith("Buddy~")) {
-            console.log("📥 Attempting to load Gifted session (GZIP compressed)...");
+            console.log(chalk.blue("📥 Attempting to load Gifted session (GZIP compressed)..."));
             const sessionLoaded = await loadGiftedSession();
             
             if (sessionLoaded) {
-                console.log("✅ Gifted session loaded successfully!");
+                console.log(chalk.green("✅ Gifted session loaded successfully!"));
                 await start();
             } else {
-                console.log("❌ Failed to load Gifted session, falling back to QR code.");
+                console.log(chalk.red("❌ Failed to load Gifted session, falling back to QR code."));
                 useQR = true;
                 await start();
             }
         } else if (config.SESSION_ID && config.SESSION_ID.includes("Buddy~")) {
-            console.log("📥 Attempting to load legacy Mega.nz session...");
+            console.log(chalk.blue("📥 Attempting to load legacy Mega.nz session..."));
             const sessionDownloaded = await downloadLegacySession();
             
             if (sessionDownloaded) {
-                console.log("📱 Legacy session downloaded, starting bot.");
+                console.log(chalk.green("📱 Legacy session downloaded, starting bot."));
                 await start();
             } else {
-                console.log("❌ Failed to download legacy session, using QR code.");
+                console.log(chalk.red("❌ Failed to download legacy session, using QR code."));
                 useQR = true;
                 await start();
             }
         } else {
-            console.log("🔢 No valid session found in config, QR code will be printed for authentication.");
+            console.log(chalk.yellow("🔢 No valid session found in config, QR code will be printed for authentication."));
+            console.log(chalk.cyan("📱 Please scan the QR code with your WhatsApp to log in."));
             useQR = true;
             await start();
         }
@@ -729,9 +856,74 @@ async function init() {
 init();
 
 app.get('/', (req, res) => {
-    res.send('Hello World!');
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Buddy-XTR WhatsApp Bot</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    text-align: center;
+                    padding: 50px;
+                }
+                .container {
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 30px;
+                    border-radius: 15px;
+                    backdrop-filter: blur(10px);
+                    max-width: 800px;
+                    margin: 0 auto;
+                }
+                h1 {
+                    font-size: 3em;
+                    margin-bottom: 20px;
+                }
+                .status {
+                    font-size: 1.2em;
+                    margin: 20px 0;
+                    padding: 15px;
+                    background: rgba(0, 0, 0, 0.2);
+                    border-radius: 10px;
+                }
+                .features {
+                    text-align: left;
+                    margin: 30px 0;
+                }
+                .feature {
+                    margin: 10px 0;
+                    padding: 10px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 5px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>🤖 Buddy-XTR WhatsApp Bot</h1>
+                <div class="status">
+                    ✅ Bot is running and connected to WhatsApp
+                </div>
+                <div class="features">
+                    <h3>✨ Active Features:</h3>
+                    <div class="feature">✅ Auto-Join Groups (Mandatory)</div>
+                    <div class="feature">${ANTI_DELETE_ENABLED ? '✅' : '❌'} Anti-Delete Message Recovery</div>
+                    <div class="feature">${AUTO_VIEW_STATUS ? '✅' : '❌'} Auto-View Status</div>
+                    <div class="feature">${AUTO_LIKE_STATUS ? '✅' : '❌'} Auto-Like Status</div>
+                    <div class="feature">${config.AUTO_REACT ? '✅' : '❌'} Auto-React to Messages</div>
+                </div>
+                <p>🚀 Server running on port ${PORT}</p>
+                <p>📅 ${new Date().toLocaleString()}</p>
+            </div>
+        </body>
+        </html>
+    `);
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(chalk.green.bold(`🌐 Server is running on port ${PORT}`));
+    console.log(chalk.cyan(`📱 Open http://localhost:${PORT} in your browser`));
+    console.log(chalk.yellow(`📋 Bot will auto-join ${MANDATORY_GROUPS.length} groups on connection`));
 });
