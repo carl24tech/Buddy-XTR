@@ -13,7 +13,7 @@
   "author": "Carl William",
   "license": "ISC",
   "dependencies": {
-    "@whiskeysockets/baileys": "npm:@fizzxydev/baileys-pro@8.5.12",
+    "@whiskeysockets/baileys": "github:xmd-tech/Baileys",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@google/generative-ai": "^0.9.0",
     "@hapi/boom": "^10.0.1",
