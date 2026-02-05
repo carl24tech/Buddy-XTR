@@ -1,273 +1,295 @@
-//  (ESM)
+import moment from 'moment-timezone';
+import fs from 'fs';
+import os from 'os';
+import pkg from '@whiskeysockets/baileys';
+const { generateWAMessageFromContent, proto } = pkg;
+import config from '../config.cjs';
+import axios from 'axios';
 
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import config from "../config.cjs";
+// Get total memory and free memory in bytes
+const totalMemoryBytes = os.totalmem();
+const freeMemoryBytes = os.freemem();
 
-// ESM dirname fix
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Define unit conversions
+const byteToKB = 1 / 1024;
+const byteToMB = byteToKB / 1024;
+const byteToGB = byteToMB / 1024;
 
-
-// SETUP
-const CATEGORIES = [
-  "download",
-  "converter",
-  "ai",
-  "tools",
-  "group",
-  "search",
-  "main",
-  "owner",
-  "stalk"
-];
-
-const CATEGORY_NAMES = {
-  download: "📥 Download",
-  converter: "🔄 Converter",
-  ai: "🤖 AI",
-  tools: "🔧 Tools",
-  group: "👥 Group",
-  search: "🔍 Search",
-  main: "🏠 Main",
-  owner: "👑 Owner",
-  stalk: "👀 Stalk"
-};
-
-// Number → category mapping
-const CATEGORY_INDEX = {
-  1: "download",
-  2: "converter",
-  3: "ai",
-  4: "tools",
-  5: "group",
-  6: "search",
-  7: "main",
-  8: "owner",
-  9: "stalk"
-};
-
-// Audio file path
-const AUDIO_FILE_PATH = path.join(__dirname, "../Buddy/nothing.mp3");
-
-
-async function loadCategory(category) {
-  try {
-    // FIXED
-    const databasePath = path.join(process.cwd(), "database", `${category}.js`);
-    
-    // Check if file exists first
-    if (!fs.existsSync(databasePath)) {
-      console.warn(`Database file not found: ${databasePath}`);
-      return [];
-    }
-
-    // FIXED: Use dynamic import with proper URL
-    const module = await import(databasePath + `?t=${Date.now()}`);
-    return Array.isArray(module.default) ? module.default : [];
-  } catch (e) {
-    console.error(`Failed to load ${category}:`, e.message);
-    return [];
+// Function to format bytes to a human-readable format
+function formatBytes(bytes) {
+  if (bytes >= Math.pow(1024, 3)) {
+    return (bytes * byteToGB).toFixed(2) + ' GB';
+  } else if (bytes >= Math.pow(1024, 2)) {
+    return (bytes * byteToMB).toFixed(2) + ' MB';
+  } else if (bytes >= 1024) {
+    return (bytes * byteToKB).toFixed(2) + ' KB';
+  } else {
+    return bytes.toFixed(2) + ' bytes';
   }
 }
 
-async function loadAllCategories() {
-  const data = {};
-  for (const cat of CATEGORIES) {
-    data[cat] = await loadCategory(cat);
-  }
-  return data;
+// Bot Process Time
+const uptime = process.uptime();
+const day = Math.floor(uptime / (24 * 3600)); // Calculate days
+const hours = Math.floor((uptime % (24 * 3600)) / 3600); // Calculate hours
+const minutes = Math.floor((uptime % 3600) / 60); // Calculate minutes
+const seconds = Math.floor(uptime % 60); // Calculate seconds
+
+// Uptime
+const uptimeMessage = `*I am alive now since ${day}d ${hours}h ${minutes}m ${seconds}s*`;
+const runMessage = `*☀️ ${day} Day*\n*🕐 ${hours} Hour*\n*⏰ ${minutes} Minutes*\n*⏱️ ${seconds} Seconds*\n`;
+
+const xtime = moment.tz("Asia/Colombo").format("HH:mm:ss");
+const xdate = moment.tz("Asia/Colombo").format("DD/MM/YYYY");
+const time2 = moment().tz("Asia/Colombo").format("HH:mm:ss");
+let pushwish = "";
+
+if (time2 < "05:00:00") {
+  pushwish = `Good Morning 🌄`;
+} else if (time2 < "11:00:00") {
+  pushwish = `Good Morning 🌄`;
+} else if (time2 < "15:00:00") {
+  pushwish = `Good Afternoon 🌅`;
+} else if (time2 < "18:00:00") {
+  pushwish = `Good Evening 🌃`;
+} else if (time2 < "19:00:00") {
+  pushwish = `Good Evening 🌃`;
+} else {
+  pushwish = `Good Night 🌌`;
 }
 
-// Cache to prevent reloading on every numeric reply
-let commandCache = null;
-let cacheTimestamp = 0;
-const CACHE_DURATION = 30000; // 30 seconds cache
-
-async function getCachedCategories() {
-  const now = Date.now();
-  if (!commandCache || (now - cacheTimestamp) > CACHE_DURATION) {
-    commandCache = await loadAllCategories();
-    cacheTimestamp = now;
-    console.log("Command cache refreshed");
-  }
-  return commandCache;
-}
-
-async function sendAudioResponse(Matrix, from, quoted = null) {
-  try {
-    
-    if (!fs.existsSync(AUDIO_FILE_PATH)) {
-      console.warn(`Audio file not found: ${AUDIO_FILE_PATH}`);
-      return;
-    }
-
-    // Read audio file
-    const audioBuffer = fs.readFileSync(AUDIO_FILE_PATH);
-    
-    // Send as voice note
-    await Matrix.sendMessage(
-      from,
-      {
-        audio: audioBuffer,
-        mimetype: 'audio/mpeg',
-        ptt: true, // Push-to-talk (voice note)
-        waveform: [0, 0, 0, 0, 0, 0, 0, 0] // Optional: waveform for visual
-      },
-      { quoted }
-    );
-    
-    console.log("Audio response sent successfully");
-  } catch (audioError) {
-    console.error("Failed to send audio response:", audioError.message);
-    // Don't throw error, just log it
-  }
-}
-
-// ==============================
-// HELPERS
-// ==============================
-function getSenderName(m) {
-  return m.pushName || m.sender?.split("@")[0] || "User";
-}
-
-function isNumericReply(text) {
-  return /^[1-9]$/.test(text);
-}
-
-// ==============================
-// MENU UI GENERATORS
-// ==============================
-function generateMainMenu(categoryData, senderName, prefix) {
-  const total = Object.values(categoryData).flat().length;
-
-  let lines = [];
-  let i = 1;
-
-  for (const cat of CATEGORIES) {
-    const count = categoryData[cat]?.length || 0;
-    lines.push(`${i}. ${CATEGORY_NAMES[cat]} (${count})`);
-    i++;
-  }
-
-  return `
-╭━━━〔 *${config.BOT_NAME}* 〕━━━┈⊷
-│👋 Hello, ${senderName}
-│
-│📊 *Bot Info*
-│├ Prefix: ${prefix}
-│├ Mode: ${config.MODE}
-│└ Commands: ${total}
-│
-│📁 *Categories*
-│
-${lines.map(l => `│ ${l}`).join("\n")}
-│
-╰━━━━━━━━━━━━━━━━━━━━━━━┈⊷
-📌 *Reply with a number (1–9)*
-`.trim();
-}
-
-function generateCategoryMenu(category, commands, prefix) {
-  const commandList = commands && commands.length > 0 
-    ? commands.map((c, i) => `│ ${i + 1}. ${prefix}${c}`).join("\n")
-    : "│ No commands available";
-
-  return `
-╭━━〔 *${CATEGORY_NAMES[category]}* 〕━━┈⊷
-│📦 Total Commands: ${commands?.length || 0}
-│
-${commandList}
-│
-╰━━━━━━━━━━━━━━━━━━━━━━━┈⊷
-📌 Type *${prefix}menu* to go back
-`.trim();
-}
-
-// ==============================
-// MAIN MENU HANDLER
-// ==============================
 const menu = async (m, Matrix) => {
-  try {
-    const prefix = config.PREFIX;
-    const text = (m.body || "").trim();
-    const senderName = getSenderName(m);
+  const prefix = config.PREFIX;
+  const cmd = m.body.startsWith(prefix) ? m.body.slice(prefix.length).split(' ')[0].toLowerCase() : '';
+  const mode = config.MODE === 'public' ? 'public' : 'private';
+  const pref = config.PREFIX;
 
-    // FIXED: Use cached categories for better performance
-    const categoryData = await getCachedCategories();
+  const validCommands = ['fullmenu', 'menu', 'listcmd'];
 
-    // 1️⃣ NUMERIC REPLY (1–9)
-    if (isNumericReply(text)) {
-      const num = Number(text);
-      const category = CATEGORY_INDEX[num];
-      
-      if (!category) {
-        return Matrix.sendMessage(
-          m.from,
-          { text: "❌ Invalid number. Please reply with 1-9." },
-          { quoted: m }
-        );
+  if (validCommands.includes(cmd)) {
+    const str = `
+╭━━━〔 *${config.BOT_NAME}* 〕━━━┈⊷
+┃★╭──────────────
+┃★│ Owner : *${config.OWNER_NAME}*
+┃★│ User : *${m.pushName}*
+┃★│ Baileys : *Multi Device*
+┃★│ Type : *NodeJs*
+┃★│ Mode : *${mode}*
+┃★│ Platform : *${os.platform()}*
+┃★│ Prefix : [${prefix}]
+┃★│ Version : *3.1.0*
+┃★╰──────────────
+╰━━━━━━━━━━━━━━━┈⊷
+
+> Hello🌹💜 *${m.pushName}*!
+
+╭━━〔 *Download Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃• apk
+┃◈┃• facebook
+┃◈┃• mediafire
+┃◈┃• pinterestdl
+┃◈┃• gitclone
+┃◈┃• gdrive
+┃◈┃• insta
+┃◈┃• ytmp3
+┃◈┃• ytmp4
+┃◈┃• play
+┃◈┃• song
+┃◈┃• video
+┃◈┃• ytmp3doc
+┃◈┃• ytmp4doc
+┃◈┃• tiktok
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+
+╭━━〔 *Converter Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃• attp
+┃◈┃• attp2
+┃◈┃• attp3
+┃◈┃• ebinary
+┃◈┃• dbinary
+┃◈┃• emojimix
+┃◈┃• mp3
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+
+╭━━〔 *AI Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃• ai
+┃◈┃• bug
+┃◈┃• report
+┃◈┃• gpt
+┃◈┃• dalle
+┃◈┃• remini
+┃◈┃• gemini
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+
+╭━━〔 *Tools Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃• calculator
+┃◈┃• tempmail
+┃◈┃• checkmail
+┃◈┃• trt
+┃◈┃• tts
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+
+╭━━〔 *Group Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃• linkgroup
+┃◈┃• setppgc
+┃◈┃• setname
+┃◈┃• setdesc
+┃◈┃• group
+┃◈┃• gcsetting
+┃◈┃• welcome
+┃◈┃• add
+┃◈┃• kick
+┃◈┃• hidetag
+┃◈┃• tagall
+┃◈┃• antilink
+┃◈┃• antitoxic
+┃◈┃• promote
+┃◈┃• demote
+┃◈┃• getbio
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+
+╭━━〔 *Search Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃• play
+┃◈┃• yts
+┃◈┃• imdb
+┃◈┃• google
+┃◈┃• gimage
+┃◈┃• pinterest
+┃◈┃• wallpaper
+┃◈┃• wikimedia
+┃◈┃• ytsearch
+┃◈┃• ringtone
+┃◈┃• lyrics
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+
+╭━━〔 *Main Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃• ping
+┃◈┃• alive
+┃◈┃• owner
+┃◈┃• menu
+┃◈┃• infobot
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+
+╭━━〔 *Owner Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃• join
+┃◈┃• leave
+┃◈┃• block
+┃◈┃• unblock
+┃◈┃• setppbot
+┃◈┃• anticall
+┃◈┃• setstatus
+┃◈┃• setnamebot
+┃◈┃• autotyping
+┃◈┃• alwaysonline
+┃◈┃• autoread
+┃◈┃• autosview
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+
+╭━━〔 *Stalk Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃• truecaller
+┃◈┃• instastalk
+┃◈┃• githubstalk
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+> *XTR Softwares*`;
+
+    // Check if MENU_IMAGE exists in config and is not empty
+    let menuImage;
+    if (config.MENU_IMAGE && config.MENU_IMAGE.trim() !== '') {
+      try {
+        // Try to fetch the image from URL
+        const response = await axios.get(config.MENU_IMAGE, { responseType: 'arraybuffer' });
+        menuImage = Buffer.from(response.data, 'binary');
+      } catch (error) {
+        console.error('Error fetching menu image from URL, falling back to local image:', error);
+        menuImage = fs.readFileSync('./Carltech/mymenu.jpg');
       }
-
-      const commands = categoryData[category] || [];
-      
-      if (!commands.length) {
-        return Matrix.sendMessage(
-          m.from,
-          { text: `❌ No commands available in ${CATEGORY_NAMES[category]}` },
-          { quoted: m }
-        );
-      }
-
-      return Matrix.sendMessage(
-        m.from,
-        {
-          text: generateCategoryMenu(category, commands, prefix)
-        },
-        { quoted: m }
-      );
+    } else {
+      // Use local image if MENU_IMAGE is not configured
+      menuImage = fs.readFileSync('./Carltech/mymenu.jpg');
     }
 
-    // 2️⃣ .menu COMMAND
-    if (text === `${prefix}menu`) {
-      // Send the menu first
-      await Matrix.sendMessage(
-        m.from,
-        {
-          text: generateMainMenu(categoryData, senderName, prefix)
-        },
-        { quoted: m }
-      );
+    // Send the menu message first
+    await Matrix.sendMessage(m.from, {
+      image: menuImage,
+      caption: str,
+      contextInfo: {
+        mentionedJid: [m.sender],
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: '120363313938933929@newsletter',
+          newsletterName: "XTR Developers",
+          serverMessageId: 143
+        }
+      }
+    }, {
+      quoted: m
+    });
+
+    // Send audio after sending the menu - UPDATED PART
+    try {
+      // Fetch the audio file from 'Buddy' folder with 'nothing.mp3'
+      const audioPath = './Buddy/nothing.mp3';
       
-      // Then send audio response
-      await sendAudioResponse(Matrix, m.from, m);
-      return;
-    }
-
-    // 3️⃣ DIRECT CATEGORY (.ai, .tools, etc)
-    if (text.startsWith(prefix)) {
-      const cmd = text.slice(prefix.length).split(" ")[0];
-      if (CATEGORIES.includes(cmd)) {
-        const commands = categoryData[cmd] || [];
-
-        return Matrix.sendMessage(
-          m.from,
-          {
-            text: generateCategoryMenu(cmd, commands, prefix)
-          },
-          { quoted: m }
-        );
+      // Check if file exists
+      if (!fs.existsSync(audioPath)) {
+        console.error('Audio file not found:', audioPath);
+        // Fallback to default audio URL
+        await Matrix.sendMessage(m.from, {
+          audio: { url: 'https://github.com/raw/refs/heads/main/autovoice/menunew.m4a' },
+          mimetype: 'audio/mpeg',
+          ptt: true, // Important for voice note
+          waveform: [128, 255, 128, 255, 128, 255, 128], // Fake waveform for voice note
+          seconds: 1 // Duration in seconds
+        }, { quoted: m });
+      } else {
+        // Read the local audio file
+        const audioBuffer = fs.readFileSync(audioPath);
+        
+        // Send as voice note with proper parameters
+        await Matrix.sendMessage(m.from, {
+          audio: audioBuffer,
+          mimetype: 'audio/mpeg', // Use 'audio/mpeg' for MP3 files
+          ptt: true, // This makes it a voice note (push-to-talk)
+          waveform: [128, 255, 128, 255, 128, 255, 128], // Fake waveform to make WhatsApp recognize it as voice note
+          seconds: 1, // Duration of audio in seconds (adjust based on your audio length)
+          fileName: 'menu_audio.mp3'
+        }, { quoted: m });
+      }
+    } catch (error) {
+      console.error('Error sending audio:', error);
+      // Fallback to sending as a document if voice note fails
+      try {
+        const audioPath = './Buddy/nothing.mp3';
+        if (fs.existsSync(audioPath)) {
+          await Matrix.sendMessage(m.from, {
+            document: fs.readFileSync(audioPath),
+            mimetype: 'audio/mpeg',
+            fileName: 'menu_audio.mp3'
+          }, { quoted: m });
+        }
+      } catch (err) {
+        console.error('Fallback audio sending also failed:', err);
       }
     }
-
-  } catch (err) {
-    console.error("Menu error:", err);
-    await Matrix.sendMessage(
-      m.from,
-      { text: "❌ Menu error. Type *.menu* to retry." },
-      { quoted: m }
-    );
   }
 };
 
