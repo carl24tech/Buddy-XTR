@@ -1,6 +1,6 @@
 {
   "name": "Buddy-XTR",
-  "description": "A WhatsApp MultiDevice Bot – Your ultimate AI-powered assistant, built in Node.js to revolutionize WhatsApp automation! From smart replies to advanced moderation, experience seamless interaction like never before. 💡✨",
+  "description": "Buddy-XTR Framework by Fluxxy Devs Kenya🌹💜, Sponsored by Carltech",
   "logo": "https://files.catbox.moe/7jt6op.jpg",
   "keywords": ["Carl William", "whatsapp-bot", "whatsapp-md-bot"],
   "repository": "https://github.com/carl24tech/Buddy-XTR",
@@ -11,6 +11,11 @@
       "description": "Ensure your session Id starts with the word Buddy~$",
       "required": true,
       "value": ""
+    },
+    "PREFIX": {
+      "description": "Command prefix for bot commands (e.g., . ! /)",
+      "required": false,
+      "value": "."
     },
     "MODE": {
       "description": "Set to 'public' or 'private' to define bot mode",
@@ -97,4 +102,4 @@
       "url": "https://github.com/clhuang/heroku-buildpack-webp-binaries.git"
     }
   ]
-  }
+}
