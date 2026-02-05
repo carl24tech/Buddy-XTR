@@ -1,19 +1,19 @@
 {
   "name": "Buddy-XTR",
   "version": "10.8.1",
-  "description": "Buddy-XTR Whatsapp bot by Carl William",
-  "main": "module.js",
+  "description": "A whatsapp bot created by Carl william",
+  "main": "synapse.js",
   "type": "module",
   "scripts": {
-    "start": "pm2 start module.js --deep-monitoring --attach --name  buddy-xtr",
-    "stop": "pm2 stop  buddy-xtr",
-    "restart": "pm2 restart  buddy-xtr"
+    "start": "pm2 start synapse.js --deep-monitoring --attach --name  Buddy-XTR",
+    "stop": "pm2 stop  Buddy-XTR",
+    "restart": "pm2 restart  Buddy-XTR"
   },
-  "keywords": ["Carltech", "whatsapp-bot", "whatsapp md bot"],
-  "author": "Carl William",
+  "keywords": ["carl-william", "whatsapp-bot", "whatsapp md bot"],
+  "author": "Buddy-XTR",
   "license": "ISC",
   "dependencies": {
-    "@whiskeysockets/baileys": "npm:xmd-baileys@^1.0.5",
+    "@whiskeysockets/baileys": "npm:xmd-baileys@latest",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@google/generative-ai": "^0.9.0",
     "@hapi/boom": "^10.0.1",
@@ -65,4 +65,4 @@
     "wasitech": "npm:@distube/ytdl-core",
     "yt-search": "^2.11.0"
   }
-  }
+}

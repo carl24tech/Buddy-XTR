@@ -2,21 +2,20 @@ FROM node:20-bookworm
 
 # Install system dependencies
 RUN apt-get update && \
-    apt-get install -y \
+    apt-get install -y --no-install-recommends \
       ffmpeg \
       imagemagick \
       webp && \
-    apt-get upgrade -y && \
     rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Copy package.json only
-COPY package.json ./
+# Copy package files first for better caching
+COPY package*.json ./
 
-# Install dependencies
-RUN npm install && npm install -g qrcode-terminal pm2
+# Install dependencies (fix peer conflict)
+RUN npm install --legacy-peer-deps --no-audit --no-fund
 
 # Copy the rest of the app
 COPY . .
