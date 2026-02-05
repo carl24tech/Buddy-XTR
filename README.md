@@ -20,21 +20,21 @@
 
 [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Rockstar-ExtraBold&color=red&lines=SCAN+WITH+EXTERNAL+CAMERA)](https://git.io/typing-svg)
 
-  <a href="https://for-buddy.onrender.com/qr"><img title="SCAN-QR" src="https://img.shields.io/badge/SCAN-QR-h?color=blue&style=for-the-badge&logo=scania" width="297" height="40.45"/></a></p>
+  <a href="https://buddy-session-server-8mzr.onrender.com/qr"><img title="SCAN-QR" src="https://img.shields.io/badge/SCAN-QR-h?color=blue&style=for-the-badge&logo=scania" width="297" height="40.45"/></a></p>
 
 
 ## PAIR CODES
 
 [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Rockstar-ExtraBold&color=blue&lines=USE+YOUR+NUMBER)](https://git.io/typing-svg)
 
- <a href="https://for-buddy.onrender.com/"><img title="PAIR-CODES" src="https://img.shields.io/badge/PAIR-CODES-h?color=black&style=for-the-badge&logo=apple" width="297" height="40.45"/></a></p>
+ <a href="https://buddy-session-server-8mzr.onrender.com/"><img title="PAIR-CODES" src="https://img.shields.io/badge/PAIR-CODES-h?color=black&style=for-the-badge&logo=apple" width="297" height="40.45"/></a></p>
 
 
 ## ALL IN GENERAL
  
 [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Rockstar-ExtraBold&color=blue&lines=ALL+OPTIONS)](https://git.io/typing-svg)
 
-<a href="https://for-buddy.onrender.com/"><img title="GENERAL" src="https://img.shields.io/badge/GENERAL-h?color=black&style=for-the-badge&logo=samsung" width="297" height="40.45"/></a></p>
+<a href="https://buddy-session-server-8mzr.onrender.com/"><img title="GENERAL" src="https://img.shields.io/badge/GENERAL-h?color=black&style=for-the-badge&logo=samsung" width="297" height="40.45"/></a></p>
 
 
 
