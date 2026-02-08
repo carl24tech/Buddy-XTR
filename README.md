@@ -1,4 +1,5 @@
 ## PROPERTY OF THE XTR SOFTWARES KENYA
+  Feel free to deploy and se it on whatsapp, Thank you!
 <div align="center">
   <a href="https://github.com/carl24tech">
     <img src="https://github-readme-stats.vercel.app/api?username=carl24tech&show_icons=true&theme=dark&border_color=00ffff&title_color=00ffff&icon_color=00ffff" width="400"/>
