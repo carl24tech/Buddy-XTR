@@ -1,4 +1,4 @@
-/**module.exports = {
+module.exports = {
   apps: [{
     name: 'buddy-xtr',
     script: './module.js',
@@ -35,4 +35,3 @@
     args: process.argv.slice(2).includes('--fresh') ? '--fresh' : ''
   }]
 };
-**/
