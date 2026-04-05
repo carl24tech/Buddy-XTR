@@ -1,24 +1,30 @@
+# Buddy XTR - Version Support Status
 
+Below is the list of Buddy XTR versions with their support status.  
+✅ = Supported  
+❌ = Unsupported  
+📦 = Partial / Limited support  
 
-## Security Policy of CarlTech Codes 
+| Version | Status | Notes |
+|---------|--------|-------|
+| Buddy XTR v1.0 | ❌ Unsupported | End of life |
+| Buddy XTR v1.1 | ❌ Unsupported | No security updates |
+| Buddy XTR v1.2 | 📦 Partial | Legacy support only |
+| Buddy XTR v2.0 | ✅ Supported | Full support |
+| Buddy XTR v2.1 | ✅ Supported | Recommended version |
+| Buddy XTR v2.2 | ✅ Supported | Latest stable |
+| Buddy XTR v3.0 (Beta) | 📦 Partial | Testing phase only |
 
-## Supported Versions
+## Checkbox Summary
 
+- [x] Buddy XTR v2.0 ✅
+- [x] Buddy XTR v2.1 ✅
+- [x] Buddy XTR v2.2 ✅
+- [ ] Buddy XTR v1.2 (partial) 📦
+- [ ] Buddy XTR v3.0 (Beta) 📦
+- [ ] Buddy XTR v1.1 ❌
+- [ ] Buddy XTR v1.0 ❌
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 7.1.x   | :white_check_mark: |
-| 6.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| 5.1.1  | :x:                |
-
-## Reporting a Vulnerability
-
-Use this section to tell people how to report a vulnerability.
-
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+> **Legend:**  
+> - `[x]` = Supported / Fully active  
+> - `[ ]` = Unsupported or limited support  
